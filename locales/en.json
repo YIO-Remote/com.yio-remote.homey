@@ -1,0 +1,12 @@
+{
+
+  "tabs": {
+    "devices": "Devices",
+    "log": "Log"
+  },
+  "device": {
+    "add": "Add",
+    "delete": "Delete",
+    "unknown": "Unknown"
+  }
+}
