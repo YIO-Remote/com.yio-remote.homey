@@ -1,0 +1,12 @@
+{
+
+  "tabs": {
+    "devices": "Geräte",
+    "log": "Log"
+  },
+  "device": {
+    "add": "Hinzufügen",
+    "delete": "Löschen",
+    "unknown": "Unbekannt"
+  }
+}
