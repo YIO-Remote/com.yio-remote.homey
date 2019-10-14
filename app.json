@@ -6,15 +6,18 @@
   "brandColor": "#000000",
   "name": {
     "en": "YIO Remote",
-    "nl": "YIO Afstandsbediening"
+    "nl": "YIO Afstandsbediening",
+    "de": "YIO Fernbedienung"
   },
   "description": {
     "en": "Adds support for the YIO opensource remote",
-    "nl": "Voegt ondersteuning toe voor de YIO afstandsbediening."
+    "nl": "Voegt ondersteuning toe voor de YIO afstandsbediening.",
+    "de": "Fügt die unterstützung der open source YIO Fernbedienung hinzu."
   },
   "tags": {
     "en": ["remote", "YIO"],
-    "nl": ["afstandsbediening", "YIO"]
+    "nl": ["afstandsbediening", "YIO"],
+    "de": ["Fernbedienung", "YIO"]
   },
   "category": "appliances",
   "compatibility": ">=2.0.0",
@@ -28,6 +31,11 @@
         "name": "Niels de Klerk",
         "email": "mail@nielsdeklerk.nl"
       }
+    ],
+    "translators": [
+        {
+            "name": "🇩🇪 - Markus Mahr"
+        }
     ]
   },
   "images": {
