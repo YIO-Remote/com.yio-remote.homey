@@ -1,6 +1,6 @@
 {
   "id": "com.yio-remote.homey",
-  "version": "0.4.1",
+  "version": "1.0.0",
   "sdk": 2,
   "permissions": ["homey:manager:api"],
   "brandColor": "#000000",
@@ -20,6 +20,11 @@
     "de": ["Fernbedienung", "YIO"]
   },
   "category": "appliances",
+  "homepage": "https://www.yio-remote.com/",
+  "bugs": {
+    "url": "https://github.com/YIO-Remote/com.yio-remote.homey/issues"
+  },
+  "source": "https://github.com/YIO-Remote/com.yio-remote.homey/",
   "compatibility": ">=2.0.0",
   "author": {
     "name": "Niels de Klerk",
@@ -33,9 +38,9 @@
       }
     ],
     "translators": [
-        {
-            "name": "🇩🇪 - Markus Mahr"
-        }
+      {
+        "name": "🇩🇪 - Markus Mahr"
+      }
     ]
   },
   "images": {
