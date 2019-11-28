@@ -35,18 +35,25 @@ class YioApp extends Homey.App {
       port: API_SERVICE_PORT
     });
     ApiService.on("connection", (connection, req) => {
-      homeyEvents.startSubscribe();
       let clientIp = tools.getClientIp(req.connection.remoteAddress);
+
+      homeyEvents.startSubscribe();
+
       yioConfigurationHelper.addDevicesToYioConfig(clientIp);
       console.log(`=======> ApiService incomming connection from ${clientIp}`);
 
       ;
       connection.on("message", message => {
-        this.messageHandler(connection, message);
+        this.messageHandler(connection, clientIp, message);
       });
 
-      connection.on("close", (reasonCode, description) => {
-        console.log("(`=======X YIO left the building");
+      connection.on("close", () => {
+        console.log("=======X YIO left the building.");
+        connection = null;
+      });
+
+      connection.on("error", () => {
+        console.log("=======X YIO left the building in a hurry.");
         connection = null;
       });
 
@@ -56,13 +63,13 @@ class YioApp extends Homey.App {
   }
 
   // handles incomming API messages
-  async messageHandler(connection, message) {
+  async messageHandler(connection, clientIp, message) {
     try {
       let jsonMessage = JSON.parse(message);
       if (jsonMessage.type && jsonMessage.type == "sendConfig") {
         for (let deviceId of jsonMessage.devices) {
           console.log(`=======> MESSAGE Requesting data for deviceId:  ${deviceId}`);
-          this.handleGetDeviceState(connection, deviceId);
+          this.handleGetDeviceState(connection, clientIp, deviceId);
         }
       } else if (jsonMessage.type && jsonMessage.type == "command") {
         console.log(`=======> Received command: ${message}`);
@@ -106,7 +113,7 @@ class YioApp extends Homey.App {
 
   //On starting a connection YIO requests all devices added to the intergration plugin.
   //This function responds with with the state of the devices and subscribes to state events.
-  async handleGetDeviceState(connection, deviceId) {
+  async handleGetDeviceState(connection, clientIp, deviceId) {
     let device = await this.api.devices.getDevice({
       id: deviceId
     });
@@ -128,7 +135,7 @@ class YioApp extends Homey.App {
       responseObject.data.color = colorConvert.hsvToRgb(device.capabilitiesObj.light_hue.value, device.capabilitiesObj.light_saturation.value, device.capabilitiesObj.dim.value);
     }
 
-    homeyEvents.addDevice(connection, device);
+    homeyEvents.addDevice(connection, clientIp, device);
 
     let response = JSON.stringify(responseObject);
     connection.send(response);
