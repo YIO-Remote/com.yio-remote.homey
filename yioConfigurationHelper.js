@@ -2,11 +2,16 @@
 const tools = require("./tools");
 
 let _allHomeyDevices = false;
+let _HomeyDevicesApi = false;
 let _configObj;
 let _socket;
 
 module.exports.registerAllHomeyDevices = function (allHomeyDevices) {
     _allHomeyDevices = allHomeyDevices;
+}
+
+module.exports.registerHomeyDevicesApi = function (devicesApi) {
+    _HomeyDevicesApi = devicesApi
 }
 
 module.exports.addDevicesToYioConfig = function (clientIp) {
@@ -47,8 +52,10 @@ function wsConnect(url) {
     };
 }
 
-function updateYioConfiguration() {
+async function updateYioConfiguration() {
+    _allHomeyDevices = await _HomeyDevicesApi.getDevices();
     let integrationId = getIntegrationId();
+    let changeCount = 0;
     for (let i in _allHomeyDevices) {
         const device = _allHomeyDevices[i];
 
@@ -57,6 +64,7 @@ function updateYioConfiguration() {
                 console.log(`[API] Adding homey device ${device.id} to YIO.`);
                 let deviceYjson = ConversionLightDeviceHtoY(device, integrationId);
                 _configObj.entities["light"].push(deviceYjson);
+                changeCount++;
             }
         }
 
@@ -65,10 +73,11 @@ function updateYioConfiguration() {
                 console.log(`[API] Adding homey device ${device.id} to YIO.`);
                 let deviceYjson = ConversionMediaDeviceHtoY(device, integrationId);
                 _configObj.entities["media_player"].push(deviceYjson);
+                changeCount++;
             }
         }
     }
-    saveConfig();
+    if (changeCount > 0) saveConfig();
 }
 
 function saveConfig() {

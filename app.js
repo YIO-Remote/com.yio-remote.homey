@@ -151,8 +151,8 @@ class YioApp extends Homey.App {
     this.startYioApiService();
 
     //List all devices for easy adding to yio config.json
-    let allHomeyDevices = await this.api.devices.getDevices();
-    yioConfigurationHelper.registerAllHomeyDevices(allHomeyDevices);
+    yioConfigurationHelper.registerHomeyDevicesApi(this.api.devices);
+
   }
 }
 
