@@ -126,10 +126,10 @@ class YioApp extends Homey.App {
     };
 
     if (device.capabilitiesObj.onoff) {
-      responseObject.data.onoff = device.capabilitiesObj.onoff.value;
+      responseObject.data.onoff = `${device.capabilitiesObj.onoff.value}`;
     }
     if (device.capabilitiesObj.dim) {
-      responseObject.data.dim = device.capabilitiesObj.dim.value;
+      responseObject.data.dim = `${device.capabilitiesObj.dim.value}`;
     }
     if (device.capabilitiesObj.light_hue && device.capabilitiesObj.light_saturation && device.capabilitiesObj.dim) {
       responseObject.data.color = colorConvert.hsvToRgb(device.capabilitiesObj.light_hue.value, device.capabilitiesObj.light_saturation.value, device.capabilitiesObj.dim.value);
@@ -140,15 +140,6 @@ class YioApp extends Homey.App {
     let response = JSON.stringify(responseObject);
     connection.send(response);
     console.log(`<======= Send message: ${response}`);
-  }
-
-  //convert states
-  convHomeyYioOnOff(device) {
-    if (device.capabilitiesObj.onoff.value) {
-      return "on";
-    } else {
-      return "off";
-    }
   }
 
   // On app init
