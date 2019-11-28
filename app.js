@@ -4,11 +4,15 @@
 // https://github.com/martonborzak/yio-remote/wiki/Homey-integration
 
 const Homey = require("homey");
-const { HomeyAPI } = require("athom-api");
+const {
+  HomeyAPI
+} = require("athom-api");
 const WebSocket = require("ws");
 const colorConvert = require("./colorconversions");
 const homeyEvents = require("./homey_events");
 const serviceMDNS = require("./service_mdns");
+const yioConfigurationHelper = require("./yioConfigurationHelper")
+const tools = require("./tools");
 
 const API_SERVICE_PORT = 8936;
 const API_SERVICE_NAME = "yio2homeyapi";
@@ -27,11 +31,16 @@ class YioApp extends Homey.App {
 
   // Start API Service.
   async startYioApiService() {
-    const ApiService = new WebSocket.Server({ port: API_SERVICE_PORT });
-    ApiService.on("connection", connection => {
+    const ApiService = new WebSocket.Server({
+      port: API_SERVICE_PORT
+    });
+    ApiService.on("connection", (connection, req) => {
       homeyEvents.startSubscribe();
-      console.log("=======> ApiService incomming connection");
+      let clientIp = tools.getClientIp(req.connection.remoteAddress);
+      yioConfigurationHelper.addDevicesToYioConfig(clientIp);
+      console.log(`=======> ApiService incomming connection from ${clientIp}`);
 
+      ;
       connection.on("message", message => {
         this.messageHandler(connection, message);
       });
@@ -66,7 +75,9 @@ class YioApp extends Homey.App {
 
   //Commanding device states.
   async commandDeviceState(deviceId, command, value) {
-    let device = await this.api.devices.getDevice({ id: deviceId });
+    let device = await this.api.devices.getDevice({
+      id: deviceId
+    });
     if (command == "toggle") {
       command = "onoff";
       value = !device.capabilitiesObj.onoff.value;
@@ -96,7 +107,9 @@ class YioApp extends Homey.App {
   //On starting a connection YIO requests all devices added to the intergration plugin.
   //This function responds with with the state of the devices and subscribes to state events.
   async handleGetDeviceState(connection, deviceId) {
-    let device = await this.api.devices.getDevice({ id: deviceId });
+    let device = await this.api.devices.getDevice({
+      id: deviceId
+    });
 
     let responseObject = {
       type: "sendStates",
@@ -140,61 +153,8 @@ class YioApp extends Homey.App {
     this.startYioApiService();
 
     //List all devices for easy adding to yio config.json
-    let homeyDevicesAll = await this.api.devices.getDevices();
-    console.log("");
-    console.log("==== HOMEY DEVICE UUID LIST ====");
-    this.displayHomeyDeviceInYioFormat(homeyDevicesAll);
-    console.log("================================");
-    console.log("");
-  }
-
-  displayHomeyDeviceInYioFormat(homeyDevicesAll) {
-    let areas = [];
-    //Print all devices
-    for (let i in homeyDevicesAll) {
-      const device = homeyDevicesAll[i];
-      if (!areas.includes(device.zoneName)) areas.push(device.zoneName);
-
-      if (device && device.class && device.class == "light") {
-        let deviceYjson = this.ConversionLightDeviceHtoY(device);
-        deviceYjson = JSON.stringify(deviceYjson);
-        console.log(deviceYjson);
-        console.log(",");
-      }
-
-      if (device && device.class && device.class == "speaker") {
-        //let deviceYjson = this.ConversionLightDeviceHtoY(device);
-        //deviceYjson = JSON.stringify(deviceYjson);
-        //console.log(deviceYjson);
-        //console.log(",");
-      }
-    }
-    //Print all areas
-    for (let area of areas) {
-      console.log(`{"area": "${area}", "bluetooth": "xx:xx:xx:xx:xx"},`);
-    }
-  }
-
-  //Converts a homey device object to a yio device object.
-  ConversionLightDeviceHtoY(device) {
-    let deviceYio = {
-      area: device.zoneName,
-      attributes: {
-        brightness: 0,
-        state: "off"
-      },
-      entity_id: device.id, //78f3ab16-c622-4bd7-aebf-3ca981e41375
-      favorite: false,
-      friendly_name: device.name,
-      integration: "homey",
-      supported_features: [], //"BRIGHTNESS", "COLOR", "COLORTEMP"
-      type: "light"
-    };
-    if (device.capabilitiesObj.dim) deviceYio.supported_features.push("BRIGHTNESS");
-    if (device.capabilitiesObj.light_temperature) deviceYio.supported_features.push("COLORTEMP");
-    if (device.capabilitiesObj.light_hue) deviceYio.supported_features.push("COLOR");
-
-    return deviceYio;
+    let allHomeyDevices = await this.api.devices.getDevices();
+    yioConfigurationHelper.registerAllHomeyDevices(allHomeyDevices);
   }
 }
 

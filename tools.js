@@ -1,6 +1,6 @@
 "use strict";
 
-module.exports.getLocalIp = function() {
+module.exports.getLocalIp = function () {
   const interfaces = require("os").networkInterfaces();
   for (const iA in interfaces) {
     const iface = interfaces[iA];
@@ -10,3 +10,8 @@ module.exports.getLocalIp = function() {
   }
   return "0.0.0.0";
 };
+
+module.exports.getClientIp = function (connectionString) {
+  connectionString = connectionString.replace("::ffff:", "");
+  return connectionString;
+}

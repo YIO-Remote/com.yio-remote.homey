@@ -1,18 +1,23 @@
 "use strict";
 
-const { ManagerImages } = require("homey");
+const {
+  ManagerImages
+} = require("homey");
 const tools = require("./tools");
 
 const SUPPORTED_EVENTS = ["onoff", "dim", "speaker_artist", "speaker_playing", "volume_set", "speaker_track"];
-const SUBSCRIBE_INITIAL_AFTER = 5000;
-const SUBSCRIBE_DELAY = 300;
+const SUBSCRIBE_INITIAL_AFTER = 5000; //milisec
+const SUBSCRIBE_DELAY = 300; //milisec
 
 let deviceListToBeSubscribed = [];
 let subscriptionTimer;
 
 // Adds a device and the used connection to a queue so a listener can be build with a short delay in between.
 function addDevice(connection, device) {
-  deviceListToBeSubscribed.push({ connection, device });
+  deviceListToBeSubscribed.push({
+    connection,
+    device
+  });
 }
 module.exports.addDevice = addDevice;
 
@@ -44,7 +49,13 @@ function subscribeToDeviceEvents(connection, device) {
           if (capName == "speaker_track") {
             grabAlbumArt(connection, device);
           }
-          const response = JSON.stringify({ type: "event", data: { entity_id: device.id, [capName]: value } });
+          const response = JSON.stringify({
+            type: "event",
+            data: {
+              entity_id: device.id,
+              [capName]: value
+            }
+          });
           console.log(`<======= Inform YIO: ${response}`);
           connection.send(response);
         });
@@ -59,7 +70,13 @@ function grabAlbumArt(connection, device) {
   console.log("== IMAGE DEBUG ==");
   if (device && device.images[0] && device.images[0].imageObj && device.images[0].imageObj.url) {
     const url = `http://${tools.getLocalIp()}${device.images[0].imageObj.url}?${Date.now()}`;
-    const response = JSON.stringify({ type: "event", data: { entity_id: device.id, album_art: url } });
+    const response = JSON.stringify({
+      type: "event",
+      data: {
+        entity_id: device.id,
+        album_art: url
+      }
+    });
     connection.send(response);
   }
   console.log("== IMAGE DEBUG ==");
