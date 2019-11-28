@@ -4,5 +4,8 @@
   },
   "1.1.0": {
     "en": "Added: Auto configuration of homey devices to YIO."
+  },
+  "1.1.1": {
+    "en": "fixed: On/Off States, Duplicate event handlers."
   }
 }

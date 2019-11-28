@@ -1,6 +1,6 @@
 {
   "id": "com.yio-remote.homey",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "sdk": 2,
   "permissions": ["homey:manager:api"],
   "brandColor": "#000000",
