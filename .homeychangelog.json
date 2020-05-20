@@ -10,5 +10,8 @@
   },
   "1.1.2": {
     "en": "fixed: no app reboot needed for config helper."
+  },
+  "1.41.1": {
+    "en": "Updated both APP and Plugin to support YIO 0.4.x. Requires Homey Plugin 0.4.1 installed on YIO to work"
   }
 }

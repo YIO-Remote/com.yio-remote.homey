@@ -1,8 +1,6 @@
 "use strict";
 
-const {
-  ManagerImages
-} = require("homey");
+const { ManagerImages } = require("homey");
 const tools = require("./tools");
 
 const SUPPORTED_EVENTS = ["onoff", "dim", "speaker_artist", "speaker_playing", "volume_set", "speaker_track"];
@@ -10,7 +8,6 @@ const SUBSCRIBE_INITIAL_AFTER = 5000; //milisec
 const SUBSCRIBE_DELAY = 300; //milisec
 
 let deviceListToBeSubscribed = [];
-let subscriptionTimer;
 let registeredEvents = {};
 
 // Adds a device and the used connection to a queue so a listener can be build with a short delay in between.
@@ -23,9 +20,9 @@ function addDevice(connection, clientIp, device) {
 }
 module.exports.addDevice = addDevice;
 
-
 // This function starts a delayed process subscription.
 function startSubscribe() {
+  console.log(`[EVENTS] Subscriber started`);
   subscriptionTimer = setTimeout(slowsubscribe, SUBSCRIBE_INITIAL_AFTER);
 }
 module.exports.startSubscribe = startSubscribe;
@@ -33,6 +30,7 @@ module.exports.startSubscribe = startSubscribe;
 // This function starts the subscribe function for 1 device at a time every x time.
 function slowsubscribe() {
   if (deviceListToBeSubscribed.length > 0) {
+    console.log(`[EVENTS] Subscribing: ${deviceListToBeSubscribed[0].clientIp} ${deviceListToBeSubscribed[0].device}`);
     subscribeToDeviceEvents(deviceListToBeSubscribed[0].connection, deviceListToBeSubscribed[0].clientIp, deviceListToBeSubscribed[0].device);
     deviceListToBeSubscribed.shift();
     setTimeout(slowsubscribe, SUBSCRIBE_DELAY);
@@ -69,7 +67,6 @@ function subscribeToDeviceEvents(connection, clientIp, device) {
       } catch (e) {
         console.log(` ERROR!  Homey Events Error building listener for ${device.name}:${device.capabilities[i]}`);
       }
-
     }
   }
 }

@@ -1,6 +1,6 @@
 {
   "id": "com.yio-remote.homey",
-  "version": "1.1.2",
+  "version": "1.41.1",
   "sdk": 2,
   "permissions": ["homey:manager:api"],
   "brandColor": "#000000",
@@ -31,13 +31,17 @@
     "email": "mail@nielsdeklerk.nl"
   },
   "contributors": {
-    "developers": [{
-      "name": "Niels de Klerk",
-      "email": "mail@nielsdeklerk.nl"
-    }],
-    "translators": [{
-      "name": "🇩🇪 - Markus Mahr"
-    }]
+    "developers": [
+      {
+        "name": "Niels de Klerk",
+        "email": "mail@nielsdeklerk.nl"
+      }
+    ],
+    "translators": [
+      {
+        "name": "🇩🇪 - Markus Mahr"
+      }
+    ]
   },
   "images": {
     "large": "./assets/images/large.png",

@@ -1,25 +1,21 @@
 "use strict";
 
 // App for YIO remote.
-// https://github.com/martonborzak/yio-remote/wiki/Homey-integration
+// https://yio-remote.com
 
 const Homey = require("homey");
-const {
-  HomeyAPI
-} = require("athom-api");
+const { HomeyAPI } = require("athom-api");
 const WebSocket = require("ws");
 const colorConvert = require("./colorconversions");
 const homeyEvents = require("./homey_events");
 const serviceMDNS = require("./service_mdns");
-const yioConfigurationHelper = require("./yioConfigurationHelper")
+const yioConfigurationHelper = require("./yioConfigurationHelper");
 const tools = require("./tools");
 
 const API_SERVICE_PORT = 8936;
 const API_SERVICE_NAME = "yio2homeyapi";
 const MESSAGE_CONNECTED = '{"type":"connected"}';
-const MESSAGE_GETCONFIG = '{"type": "command","command": "get_config"}';
-
-let connectionManager = {};
+const MESSAGE_GETENTITIES = '{"type":"command","command":"getEntities"}';
 
 class YioApp extends Homey.App {
   getApi() {
@@ -34,46 +30,67 @@ class YioApp extends Homey.App {
     const ApiService = new WebSocket.Server({
       port: API_SERVICE_PORT
     });
+
     ApiService.on("connection", (connection, req) => {
       let clientIp = tools.getClientIp(req.connection.remoteAddress);
 
       homeyEvents.startSubscribe();
 
-      yioConfigurationHelper.addDevicesToYioConfig(clientIp);
-      console.log(`=======> ApiService incomming connection from ${clientIp}`);
+      console.log(`[PLUGIN] incomming connection from ${clientIp}`);
 
-      ;
       connection.on("message", message => {
+        console.log(`[PLUGIN]: ${message}`);
         this.messageHandler(connection, clientIp, message);
       });
 
       connection.on("close", () => {
-        console.log("=======X YIO left the building.");
+        console.log("[PLUGIN] YIO left the building.");
         connection = null;
       });
 
       connection.on("error", () => {
-        console.log("=======X YIO left the building in a hurry.");
+        console.log("[PLUGIN] YIO left the building in a hurry.");
         connection = null;
       });
 
-      connection.send(MESSAGE_CONNECTED);
-      connection.send(MESSAGE_GETCONFIG);
+      // delay the communications to make sure all is good before comms.
+      setTimeout(this.pluginInit, 1500, connection);
     });
+  }
+
+  async pluginInit(connection) {
+    // Tell the plugin that the APP and Plugin are connected
+    console.log(`[APP]: ${MESSAGE_CONNECTED}`);
+    connection.send(MESSAGE_CONNECTED);
+
+    // Inform the Plugin about the available entities
+    let payload = await yioConfigurationHelper.buildHomeyEntitities();
+    console.log(`[APP]: ${payload}`);
+    connection.send(payload);
+
+    // Ask the plugin about the actually used entities
+    console.log(`[APP]: ${MESSAGE_GETENTITIES}`);
+    connection.send(MESSAGE_GETENTITIES);
   }
 
   // handles incomming API messages
   async messageHandler(connection, clientIp, message) {
     try {
       let jsonMessage = JSON.parse(message);
-      if (jsonMessage.type && jsonMessage.type == "sendConfig") {
+
+      //Yio req config
+      if (jsonMessage.type && jsonMessage.type == "getEntities") {
         for (let deviceId of jsonMessage.devices) {
-          console.log(`=======> MESSAGE Requesting data for deviceId:  ${deviceId}`);
+          console.log(`[PLUGIN] Requesting data for deviceId:  ${deviceId}`);
           this.handleGetDeviceState(connection, clientIp, deviceId);
         }
+
+        // if a command is received
       } else if (jsonMessage.type && jsonMessage.type == "command") {
-        console.log(`=======> Received command: ${message}`);
+        console.log(`[PLUGIN] command: ${message}`);
         this.commandDeviceState(jsonMessage.deviceId, jsonMessage.command, jsonMessage.value);
+
+        // Respond with all devices
       }
     } catch (e) {
       console.log(`ERROR: ${e}`);
@@ -153,6 +170,7 @@ class YioApp extends Homey.App {
     //List all devices for easy adding to yio config.json
     yioConfigurationHelper.registerHomeyDevicesApi(this.api.devices);
 
+    console.log(Homey);
   }
 }
 
