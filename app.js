@@ -169,8 +169,6 @@ class YioApp extends Homey.App {
 
     //List all devices for easy adding to yio config.json
     yioConfigurationHelper.registerHomeyDevicesApi(this.api.devices);
-
-    console.log(Homey);
   }
 }
 

@@ -8,6 +8,7 @@ const SUBSCRIBE_INITIAL_AFTER = 5000; //milisec
 const SUBSCRIBE_DELAY = 300; //milisec
 
 let deviceListToBeSubscribed = [];
+let subscriptionTimer;
 let registeredEvents = {};
 
 // Adds a device and the used connection to a queue so a listener can be build with a short delay in between.
